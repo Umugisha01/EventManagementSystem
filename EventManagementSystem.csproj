@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="EventManagementSystem\EMS.Common\EMS.Common.csproj" />
+    <None Include="EventManagementSystem\EMS.Module1_VenueSeat\EMS.Module1_VenueSeat.csproj" />
+    <None Include="EventManagementSystem\EMS.Module2_EventSpeaker\EMS.Module2_EventSpeaker.csproj" />
+    <None Include="EventManagementSystem\EMS.Module3_RegistrationPayment\EMS.Module3_RegistrationPayment.csproj" />
+    <None Include="EventManagementSystem\EMS.Module4_ReportingExport\EMS.Module4_ReportingExport.csproj" />
+    <None Include="EventManagementSystem\EMS.Web\EMS.Web.csproj" />
+  </ItemGroup>
+
+</Project>
