@@ -1,0 +1,102 @@
+﻿[36mvite v8.0.8 [32mbuilding client environment for production...[36m[39m
+[2K
+transforming...Γ£ô 2144 modules transformed.
+rendering chunks...
+node.exe : [31mΓ£ù[39m Build 
+failed in 7.47s
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~
+    + CategoryInfo          :  
+   NotSpecified: ([31mΓ£ù[3  
+  9m Build failed in 7.47s:S   
+ tring) [], RemoteException
+    + FullyQualifiedErrorId :  
+   NativeCommandError
+ 
+[31merror during build:
+[31mBuild failed with 1 error:
+
+[31m[MISSING_EXPORT] 
+Error:[0m "Github" is not 
+exported by "node_modules/lucid
+e-react/dist/esm/lucide-react.j
+s".
+   [38;5;246mΓò¡[0m[38;5;246
+mΓöÇ[0m[38;5;246m[[0m 
+src/pages/Login.jsx:3:34 
+[38;5;246m][0m
+   [38;5;246mΓöé[0m
+ [38;5;246m3 Γöé[0m [38;5;24
+9mi[0m[38;5;249mm[0m[38;5;2
+49mp[0m[38;5;249mo[0m[38;5;
+249mr[0m[38;5;249mt[0m[38;5
+;249m [0m[38;5;249m{[0m[38;
+5;249m [0m[38;5;249mU[0m[38
+;5;249ms[0m[38;5;249me[0m[3
+8;5;249mr[0m[38;5;249m,[0m[
+38;5;249m [0m[38;5;249mL[0m
+[38;5;249mo[0m[38;5;249mc[0m
+[38;5;249mk[0m[38;5;249m,[0
+m[38;5;249m [0m[38;5;249mA[
+0m[38;5;249mr[0m[38;5;249mr
+[0m[38;5;249mo[0m[38;5;249mw
+[0m[38;5;249mR[0m[38;5;249m
+i[0m[38;5;249mg[0m[38;5;249
+mh[0m[38;5;249mt[0m[38;5;24
+9m,[0m[38;5;249m 
+[0mGithub[38;5;249m [0m[38;
+5;249m}[0m[38;5;249m [0m[38
+;5;249mf[0m[38;5;249mr[0m[3
+8;5;249mo[0m[38;5;249mm[0m[
+38;5;249m [0m[38;5;249m"[0m
+[38;5;249ml[0m[38;5;249mu[0m
+[38;5;249mc[0m[38;5;249mi[0
+m[38;5;249md[0m[38;5;249me[
+0m[38;5;249m-[0m[38;5;249mr
+[0m[38;5;249me[0m[38;5;249ma
+[0m[38;5;249mc[0m[38;5;249m
+t[0m[38;5;249m"[0m[38;5;249
+m;[0m
+ [38;5;240m  Γöé[0m          
+                        
+ΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇ  
+ [38;5;240m  Γöé[0m          
+                           
+Γò░ΓöÇΓöÇΓöÇΓöÇ Missing export
+[38;5;246mΓöÇΓöÇΓöÇΓò»[0m
+[31m
+    at aggregateBindingErrorsIn
+toJsError (file:///D:/.Net01/no
+de_modules/rolldown/dist/shared
+/error-w0u7biK-.mjs:48:18)
+    at unwrapBindingResult (fil
+e:///D:/.Net01/node_modules/rol
+ldown/dist/shared/error-w0u7biK
+-.mjs:18:128)
+    at #build (file:///D:/.Net0
+1/node_modules/rolldown/dist/sh
+ared/rolldown-build-DtGk-m96.mj
+s:3313:34)
+    at async buildEnvironment (
+file:///D:/.Net01/node_modules/
+vite/dist/node/chunks/node.js:3
+2954:64)
+    at async Object.build (file
+:///D:/.Net01/node_modules/vite
+/dist/node/chunks/node.js:33376
+:19)
+    at async Object.buildApp (f
+ile:///D:/.Net01/node_modules/v
+ite/dist/node/chunks/node.js:33
+373:153)
+    at async CAC.<anonymous> (f
+ile:///D:/.Net01/node_modules/v
+ite/dist/node/cli.js:778:3) {
+  errors: [Getter/Setter]
+}[39m
