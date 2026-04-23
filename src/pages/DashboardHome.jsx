@@ -1,5 +1,6 @@
-import { TrendingUp, Users, Calendar, DollarSign, Download, Plus, BarChart, CheckCircle2 } from 'lucide-react';
+import { TrendingUp, Users, Calendar, DollarSign, Download, Plus, BarChart, CheckCircle2, X } from 'lucide-react';
 import { RevenueChart, OccupancyChart, AttendanceLineChart } from '../components/Admin/Analytics';
+import { useState } from 'react';
 
 const StatCard = ({ title, value, icon: Icon, trend }) => (
   <div className="glass-card p-6">
@@ -17,6 +18,46 @@ const StatCard = ({ title, value, icon: Icon, trend }) => (
 );
 
 const DashboardHome = () => {
+  const [showNewEventModal, setShowNewEventModal] = useState(false);
+  const [eventForm, setEventForm] = useState({
+    title: '',
+    category: '',
+    date: '',
+    location: '',
+    price: '',
+    attendees: '',
+    description: '',
+    highlights: '',
+    image: ''
+  });
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setEventForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // Here you would typically send the data to your backend
+    console.log('Creating new event:', eventForm);
+    // Reset form and close modal
+    setEventForm({
+      title: '',
+      category: '',
+      date: '',
+      location: '',
+      price: '',
+      attendees: '',
+      description: '',
+      highlights: '',
+      image: ''
+    });
+    setShowNewEventModal(false);
+    // You could show a success message here
+  };
   return (
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -29,7 +70,7 @@ const DashboardHome = () => {
             <Download className="w-4 h-4" />
             <span>Export Report</span>
           </button>
-          <button className="btn-primary flex items-center space-x-2 !px-6 py-2 text-sm">
+          <button className="btn-primary flex items-center space-x-2 !px-6 py-2 text-sm" onClick={() => setShowNewEventModal(true)}>
             <Plus className="w-4 h-4" />
             <span>New Event</span>
           </button>
@@ -89,6 +130,163 @@ const DashboardHome = () => {
           </div>
         </div>
       </div>
+
+      {/* New Event Modal */}
+      {showNewEventModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="glass-card w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center p-6 border-b border-white/10">
+              <h2 className="text-2xl font-bold">Create New Event</h2>
+              <button
+                onClick={() => setShowNewEventModal(false)}
+                className="p-2 hover:bg-white/5 rounded-xl transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form className="p-6 space-y-6" onSubmit={handleSubmit}>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Event Title</label>
+                  <input
+                    type="text"
+                    name="title"
+                    value={eventForm.title}
+                    onChange={handleInputChange}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 outline-none focus:border-event-gold"
+                    placeholder="Enter event title"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Category</label>
+                  <select
+                    name="category"
+                    value={eventForm.category}
+                    onChange={handleInputChange}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 outline-none focus:border-event-gold"
+                    required
+                  >
+                    <option value="">Select category</option>
+                    <option value="technology">Technology</option>
+                    <option value="tourism">Tourism</option>
+                    <option value="creative">Creative</option>
+                    <option value="business">Business</option>
+                    <option value="sports">Sports</option>
+                    <option value="education">Education</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Date</label>
+                  <input
+                    type="date"
+                    name="date"
+                    value={eventForm.date}
+                    onChange={handleInputChange}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 outline-none focus:border-event-gold"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Location</label>
+                  <input
+                    type="text"
+                    name="location"
+                    value={eventForm.location}
+                    onChange={handleInputChange}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 outline-none focus:border-event-gold"
+                    placeholder="Enter venue location"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Price (RWF)</label>
+                  <input
+                    type="number"
+                    name="price"
+                    value={eventForm.price}
+                    onChange={handleInputChange}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 outline-none focus:border-event-gold"
+                    placeholder="0"
+                    min="0"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Expected Attendees</label>
+                  <input
+                    type="number"
+                    name="attendees"
+                    value={eventForm.attendees}
+                    onChange={handleInputChange}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 outline-none focus:border-event-gold"
+                    placeholder="0"
+                    min="0"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Description</label>
+                <textarea
+                  rows={4}
+                  name="description"
+                  value={eventForm.description}
+                  onChange={handleInputChange}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 outline-none focus:border-event-gold resize-none"
+                  placeholder="Describe your event..."
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Highlights (comma-separated)</label>
+                <input
+                  type="text"
+                  name="highlights"
+                  value={eventForm.highlights}
+                  onChange={handleInputChange}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 outline-none focus:border-event-gold"
+                  placeholder="e.g., Networking, Workshops, Awards"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Event Image URL</label>
+                <input
+                  type="url"
+                  name="image"
+                  value={eventForm.image}
+                  onChange={handleInputChange}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 outline-none focus:border-event-gold"
+                  placeholder="https://..."
+                />
+              </div>
+
+              <div className="flex justify-end space-x-4 pt-4 border-t border-white/10">
+                <button
+                  type="button"
+                  onClick={() => setShowNewEventModal(false)}
+                  className="glass-button"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn-primary"
+                >
+                  Create Event
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
