@@ -1,0 +1,68 @@
+export const EVENTS = [
+  {
+    id: '1',
+    title: 'Rwanda Tech Summit 2026',
+    date: 'May 15-17, 2026',
+    location: 'Kigali Convention Centre',
+    attendees: '1,200+',
+    category: 'Technology',
+    price: '50,000 RWF',
+    description: 'Join industry leaders for the biggest technology summit in East Africa. Explore AI, Fintech, and the future of Digital Rwanda through workshops, networking, and innovation showcases.',
+    image: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?auto=format&fit=crop&q=80&w=1200',
+    highlights: ['AI innovation', 'Fintech showcases', 'Startup pitch stage'],
+    speakers: [
+      { name: 'Hon. Paula Ingabire', role: 'Keynote Speaker', avatar: 'https://i.pravatar.cc/150?u=paula' },
+      { name: 'John Kagabo', role: 'Fintech Expert', avatar: 'https://i.pravatar.cc/150?u=john' },
+    ],
+  },
+  {
+    id: '2',
+    title: 'Visit Rwanda Tourism Gala',
+    date: 'June 05, 2026',
+    location: 'Intare Conference Arena',
+    attendees: '800+',
+    category: 'Tourism',
+    price: '30,000 RWF',
+    description: 'A premium networking gala for tourism stakeholders, curated experiences, and travel industry talks celebrating Rwanda’s hospitality and destination excellence.',
+    image: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=1200',
+    highlights: ['Cultural showcases', 'Destination launches', 'Hospitality awards'],
+    speakers: [
+      { name: 'Amina Muhayimana', role: 'Travel Consultant', avatar: 'https://i.pravatar.cc/150?u=amina' },
+      { name: 'Eric Nkurunziza', role: 'Tourism Ambassador', avatar: 'https://i.pravatar.cc/150?u=eric' },
+    ],
+  },
+  {
+    id: '3',
+    title: 'Kigali Creative Expo',
+    date: 'July 20-22, 2026',
+    location: 'Kigali Heights',
+    attendees: '2,500+',
+    category: 'Creative',
+    price: '20,000 RWF',
+    description: 'A vibrant celebration of creative industries, live performances, art installations, and business showcases for artists, designers, and cultural entrepreneurs.',
+    image: 'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&q=80&w=1200',
+    highlights: ['Live performances', 'Art markets', 'Creative workshops'],
+    speakers: [
+      { name: 'Marie Uwase', role: 'Creative Director', avatar: 'https://i.pravatar.cc/150?u=marie' },
+      { name: 'Alex Nsabimana', role: 'Design Mentor', avatar: 'https://i.pravatar.cc/150?u=alex' },
+    ],
+  },
+  {
+    id: '4',
+    title: 'Rwanda Sports & Wellness Fair',
+    date: 'August 11-13, 2026',
+    location: 'Kigali Arena',
+    attendees: '1,700+',
+    category: 'Sports',
+    price: '25,000 RWF',
+    description: 'A health-first public fair with fitness sessions, sports clinics, wellness talks, and live demonstrations from leading Rwandan athletes.',
+    image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&q=80&w=1200',
+    highlights: ['Fitness clinics', 'Healthy living talks', 'Family activities'],
+    speakers: [
+      { name: 'Samira Uwamahoro', role: 'Wellness Coach', avatar: 'https://i.pravatar.cc/150?u=samira' },
+      { name: 'Cedric Niyonzima', role: 'Athlete Speaker', avatar: 'https://i.pravatar.cc/150?u=cedric' },
+    ],
+  },
+];
+
+export const getEventById = (id) => EVENTS.find((event) => event.id === id);
