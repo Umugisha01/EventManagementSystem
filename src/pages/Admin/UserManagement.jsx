@@ -222,7 +222,7 @@ const UserManagement = () => {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left">
             <thead>
               <tr className="bg-white/5 text-[var(--text-secondary)] text-xs uppercase font-bold tracking-widest">
@@ -304,6 +304,67 @@ const UserManagement = () => {
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile List View */}
+        <div className="md:hidden divide-y divide-[var(--border-color)]">
+          {loading ? (
+             <div className="p-12 text-center">
+                <div className="w-10 h-10 border-4 border-event-gold border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Loading Tactical Registry...</p>
+             </div>
+          ) : currentUsers.map((u) => (
+            <div key={u.id} className="p-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 rounded-xl bg-event-gold/10 flex items-center justify-center font-bold text-event-gold border border-event-gold/20">
+                    {u.fullName[0]}
+                  </div>
+                  <div>
+                    <p className="font-bold text-base">{u.fullName}</p>
+                    <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest border ${getRoleBadge(u.role)}`}>
+                      {u.role}
+                    </span>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => toggleStatus(u)}
+                  className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-tighter ${
+                    u.isActive ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'
+                  }`}
+                >
+                  {u.isActive ? 'ACTIVE' : 'LOCKED'}
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 text-[10px]">
+                <div className="bg-white/5 p-3 rounded-xl border border-white/5 flex items-center space-x-2 overflow-hidden">
+                   <Mail className="w-3 h-3 text-event-gold flex-shrink-0" />
+                   <span className="truncate text-gray-400">{u.email}</span>
+                </div>
+                <div className="bg-white/5 p-3 rounded-xl border border-white/5 flex items-center space-x-2">
+                   <Phone className="w-3 h-3 text-event-gold flex-shrink-0" />
+                   <span className="text-gray-400">{u.phoneNumber || 'N/A'}</span>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2 pt-2">
+                <button 
+                  onClick={() => openEditModal(u)}
+                  className="flex-1 py-3 bg-white/5 hover:bg-white/10 rounded-xl flex items-center justify-center space-x-2 transition-all"
+                >
+                   <Edit2 className="w-4 h-4 text-event-gold" />
+                   <span className="text-[10px] font-black uppercase">Edit</span>
+                </button>
+                <button 
+                  onClick={() => handleDelete(u.id)}
+                  className="px-4 py-3 bg-red-500/10 hover:bg-red-500/20 rounded-xl flex items-center justify-center transition-all"
+                >
+                   <Trash2 className="w-4 h-4 text-red-500" />
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* Global Fallback for Empty Search */}

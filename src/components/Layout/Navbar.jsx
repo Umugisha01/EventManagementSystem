@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Calendar, User, LayoutDashboard, Menu, X, LogOut } from 'lucide-react';
+import { Calendar, User, LayoutDashboard, Menu, X, LogOut, ScanLine, History } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import ThemeToggle from '../Common/ThemeToggle';
@@ -89,52 +89,84 @@ const Navbar = () => {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="md:hidden absolute top-full left-0 w-full bg-[var(--bg-primary)]/95 backdrop-blur-xl border-b border-[var(--border-color)] p-6 flex flex-col space-y-4"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="md:hidden absolute top-full left-0 w-full bg-[var(--bg-primary)]/98 backdrop-blur-xl border-b border-[var(--border-color)] overflow-hidden z-50 shadow-2xl"
           >
-            {user && (
-              <div className="flex items-center space-x-4 p-4 bg-white/5 rounded-2xl border border-[var(--border-color)] mb-4">
-                 <div className="w-12 h-12 bg-event-gold/20 rounded-xl flex items-center justify-center text-event-gold font-bold text-lg italic">
-                    {user?.name?.charAt(0) || user?.username?.charAt(0) || 'U'}
-                 </div>
-                 <div>
-                    <p className="font-bold">{user.name || user.username || 'User'}</p>
-                    <p className="text-[10px] text-[var(--text-secondary)] uppercase font-black tracking-widest">{user.role}</p>
-                 </div>
-              </div>
-            )}
+            <div className="p-6 flex flex-col space-y-2">
+              {user && (
+                <div className="flex items-center space-x-4 p-4 bg-white/5 rounded-2xl border border-[var(--border-color)] mb-4">
+                  <div className="w-12 h-12 bg-event-gold/20 rounded-xl flex items-center justify-center text-event-gold font-bold text-lg italic">
+                      {user?.fullName?.charAt(0) || user?.username?.charAt(0) || 'U'}
+                  </div>
+                  <div>
+                      <p className="font-bold">{user.fullName || user.username || 'User'}</p>
+                      <p className="text-[10px] text-[var(--text-secondary)] uppercase font-black tracking-widest">{user.role}</p>
+                  </div>
+                </div>
+              )}
 
-            {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                onClick={() => setIsOpen(false)}
-                className="flex items-center space-x-3 text-lg font-medium"
-              >
-                <link.icon className="text-event-gold w-5 h-5" />
-                <span>{link.name}</span>
-              </Link>
-            ))}
+              {/* Standard Links */}
+              {navLinks.map((link) => (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/5 text-lg font-medium"
+                >
+                  <link.icon className="text-event-gold w-5 h-5" />
+                  <span>{link.name}</span>
+                </Link>
+              ))}
 
-            {user ? (
-               <button 
-                onClick={() => { logout(); setIsOpen(false); }}
-                className="w-full mt-6 flex items-center justify-center space-x-2 py-4 bg-red-500/10 text-red-500 rounded-2xl font-bold border border-red-500/20"
-               >
-                  <LogOut className="w-5 h-5" />
-                  <span>Logout</span>
-               </button>
-            ) : (
-              <Link
-                to="/login"
-                onClick={() => setIsOpen(false)}
-                className="btn-primary text-center py-4 mt-4"
-              >
-                Sign In
-              </Link>
-            )}
+              <hr className="border-[var(--border-color)] my-2" />
+
+              {/* Portal Links (Mobile only) */}
+              {user && (
+                <div className="space-y-1">
+                   <p className="text-[10px] font-black uppercase text-gray-500 tracking-[0.2em] px-3 mb-2">Portal Navigation</p>
+                   {/* This is dynamic based on Sidebar logic - I'll simplify here or import */}
+                   {user.role === 'admin' && (
+                     <>
+                        <Link to="/dashboard" onClick={() => setIsOpen(false)} className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/5 font-bold text-sm">System Overview</Link>
+                        <Link to="/dashboard/events" onClick={() => setIsOpen(false)} className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/5 font-bold text-sm">Events Management</Link>
+                        <Link to="/dashboard/users" onClick={() => setIsOpen(false)} className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/5 font-bold text-sm">User Registry</Link>
+                     </>
+                   )}
+                   {user.role === 'staff' && (
+                     <>
+                        <Link to="/dashboard/scanner" onClick={() => setIsOpen(false)} className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/5 font-bold text-sm italic"><ScanLine size={18} className="text-event-gold" /> Tactical QR Scanner</Link>
+                        <Link to="/dashboard/scanned" onClick={() => setIsOpen(false)} className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/5 font-bold text-sm"><History size={18} /> Scanned Logs</Link>
+                     </>
+                   )}
+                   {user.role === 'manager' && (
+                     <>
+                        <Link to="/dashboard/my-events" onClick={() => setIsOpen(false)} className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/5 font-bold text-sm">My Tactical Events</Link>
+                        <Link to="/dashboard/staff" onClick={() => setIsOpen(false)} className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/5 font-bold text-sm">Staff Management</Link>
+                     </>
+                   )}
+                </div>
+              )}
+
+              {user ? (
+                <button 
+                  onClick={() => { logout(); setIsOpen(false); }}
+                  className="w-full mt-6 flex items-center justify-center space-x-2 py-4 bg-red-500/10 text-red-500 rounded-2xl font-bold border border-red-500/20"
+                >
+                    <LogOut className="w-5 h-5" />
+                    <span>Logout</span>
+                </button>
+              ) : (
+                <Link
+                  to="/login"
+                  onClick={() => setIsOpen(false)}
+                  className="btn-primary text-center py-4 mt-4"
+                >
+                  Sign In
+                </Link>
+              )}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

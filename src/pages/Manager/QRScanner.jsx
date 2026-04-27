@@ -122,19 +122,19 @@ const QRScanner = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 pb-12">
-      <div className="flex justify-between items-center text-center md:text-left flex-col md:flex-row gap-6">
-        <div>
-          <span className="text-[10px] font-black text-event-gold uppercase tracking-[0.3em] border border-event-gold/30 bg-event-gold/10 px-3 py-1.5 rounded-full inline-block mb-4 shadow-lg shadow-event-gold/10">
-            Scanner Identity: {user?.id} | {user?.fullName}
+    <div className="max-w-4xl mx-auto space-y-6 md:space-y-8 pb-12 px-2 md:px-0">
+      <div className="flex justify-between items-center text-center md:text-left flex-col md:flex-row gap-4">
+        <div className="w-full md:w-auto">
+          <span className="text-[9px] md:text-[10px] font-black text-event-gold uppercase tracking-[0.3em] border border-event-gold/30 bg-event-gold/10 px-3 py-1.5 rounded-full inline-block mb-3 shadow-lg shadow-event-gold/10">
+            Scanner ID: {user?.id}
           </span>
-          <h1 className="text-4xl font-black italic tracking-tighter uppercase">Tactical QR Scanner</h1>
-          <p className="text-[var(--text-secondary)] font-medium">Verify guest credentials and authorize venue admission.</p>
+          <h1 className="text-2xl md:text-4xl font-black italic tracking-tighter uppercase leading-none">Tactical QR Scanner</h1>
+          <p className="text-xs md:text-base text-[var(--text-secondary)] font-medium mt-2">Verify guest credentials and authorize admission.</p>
         </div>
-        <div className="flex items-center space-x-2 bg-white/5 p-4 rounded-2xl border border-white/10 shadow-2xl">
+        <div className="flex items-center space-x-3 bg-white/5 p-4 rounded-2xl border border-white/10 shadow-2xl w-full md:w-auto justify-center md:justify-start">
             <Users className="w-6 h-6 text-event-gold" />
             <div>
-               <p className="text-[10px] font-black uppercase text-gray-500 tracking-widest leading-none">Scanned (Your Shift)</p>
+               <p className="text-[10px] font-black uppercase text-gray-500 tracking-widest leading-none">Shift Logs</p>
                <p className="text-2xl font-black">{stats.total}</p>
             </div>
         </div>
