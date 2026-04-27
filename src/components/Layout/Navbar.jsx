@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Calendar, User, LayoutDashboard, Menu, X, LogOut, ScanLine, History } from 'lucide-react';
+import { Calendar, User, LayoutDashboard, Menu, X, LogOut, ScanLine, History, ChevronRight, Home, Users, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import ThemeToggle from '../Common/ThemeToggle';
@@ -9,6 +9,7 @@ import { useAuth } from '../Common/AuthContext';
 const Navbar = () => {
   const { user, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+  const [dashboardOpen, setDashboardOpen] = useState(true); // Default open for better UX
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
 
@@ -120,32 +121,75 @@ const Navbar = () => {
                 </Link>
               ))}
 
-              <hr className="border-[var(--border-color)] my-2" />
-
-              {/* Portal Links (Mobile only) */}
+              {/* Portal Accordion (Mobile only) */}
               {user && (
                 <div className="space-y-1">
-                   <p className="text-[10px] font-black uppercase text-gray-500 tracking-[0.2em] px-3 mb-2">Portal Navigation</p>
-                   {/* This is dynamic based on Sidebar logic - I'll simplify here or import */}
-                   {user.role === 'admin' && (
-                     <>
-                        <Link to="/dashboard" onClick={() => setIsOpen(false)} className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/5 font-bold text-sm">System Overview</Link>
-                        <Link to="/dashboard/events" onClick={() => setIsOpen(false)} className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/5 font-bold text-sm">Events Management</Link>
-                        <Link to="/dashboard/users" onClick={() => setIsOpen(false)} className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/5 font-bold text-sm">User Registry</Link>
-                     </>
-                   )}
-                   {user.role === 'staff' && (
-                     <>
-                        <Link to="/dashboard/scanner" onClick={() => setIsOpen(false)} className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/5 font-bold text-sm italic"><ScanLine size={18} className="text-event-gold" /> Tactical QR Scanner</Link>
-                        <Link to="/dashboard/scanned" onClick={() => setIsOpen(false)} className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/5 font-bold text-sm"><History size={18} /> Scanned Logs</Link>
-                     </>
-                   )}
-                   {user.role === 'manager' && (
-                     <>
-                        <Link to="/dashboard/my-events" onClick={() => setIsOpen(false)} className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/5 font-bold text-sm">My Tactical Events</Link>
-                        <Link to="/dashboard/staff" onClick={() => setIsOpen(false)} className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/5 font-bold text-sm">Staff Management</Link>
-                     </>
-                   )}
+                   <button 
+                    onClick={() => setDashboardOpen(!dashboardOpen)}
+                    className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 text-lg font-medium transition-colors"
+                   >
+                     <div className="flex items-center space-x-3 text-event-gold">
+                        <LayoutDashboard className="w-5 h-5" />
+                        <span>Portal Dashboard</span>
+                     </div>
+                     <motion.div animate={{ rotate: dashboardOpen ? 180 : 0 }}>
+                        <ChevronRight className="w-4 h-4" />
+                     </motion.div>
+                   </button>
+
+                   <AnimatePresence>
+                     {dashboardOpen && (
+                       <motion.div 
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden bg-white/5 rounded-2xl mt-1 border border-white/5"
+                       >
+                         <div className="p-2 space-y-1">
+                            {user.role === 'admin' && (
+                              <>
+                                 <Link to="/dashboard" onClick={() => setIsOpen(false)} className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/10 font-bold text-sm">
+                                   <Home size={16} className="text-event-gold" /> System Overview
+                                 </Link>
+                                 <Link to="/dashboard/events" onClick={() => setIsOpen(false)} className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/10 font-bold text-sm">
+                                   <Calendar size={16} className="text-event-gold" /> Events Management
+                                 </Link>
+                                 <Link to="/dashboard/users" onClick={() => setIsOpen(false)} className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/10 font-bold text-sm">
+                                   <ShieldCheck size={16} className="text-event-gold" /> User Registry
+                                 </Link>
+                              </>
+                            )}
+                            {user.role === 'staff' && (
+                              <>
+                                 <Link to="/dashboard/scanner" onClick={() => setIsOpen(false)} className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/10 font-bold text-sm italic">
+                                   <ScanLine size={16} className="text-event-gold" /> Tactical QR Scanner
+                                 </Link>
+                                 <Link to="/dashboard/scanned" onClick={() => setIsOpen(false)} className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/10 font-bold text-sm">
+                                   <History size={16} className="text-event-gold" /> Scanned Logs
+                                 </Link>
+                              </>
+                            )}
+                            {user.role === 'manager' && (
+                              <>
+                                 <Link to="/dashboard/my-events" onClick={() => setIsOpen(false)} className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/10 font-bold text-sm">
+                                   <Calendar size={16} className="text-event-gold" /> My Tactical Events
+                                 </Link>
+                                 <Link to="/dashboard/staff" onClick={() => setIsOpen(false)} className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/10 font-bold text-sm">
+                                   <Users size={16} className="text-event-gold" /> Staff Management
+                                 </Link>
+                              </>
+                            )}
+                            {user.role === 'attendee' && (
+                              <>
+                                 <Link to="/dashboard/bookings" onClick={() => setIsOpen(false)} className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/10 font-bold text-sm">
+                                   <LayoutDashboard size={16} className="text-event-gold" /> My Tickets
+                                 </Link>
+                              </>
+                            )}
+                         </div>
+                       </motion.div>
+                     )}
+                   </AnimatePresence>
                 </div>
               )}
 
