@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5202/api';
+const API_BASE_URL = 'https://rweh.runasp.net/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -38,7 +38,16 @@ api.interceptors.response.use(
     return response.data;
   },
   (error) => {
-    const message = error.response?.data?.message || error.message || 'Network Error';
+    let message = 'Network Error';
+    if (error.response?.data) {
+      const data = error.response.data;
+      message = data.message || error.message;
+      
+      // If there are specific validation errors, include the first one for clarity
+      if (data.errors && data.errors.length > 0) {
+        message = `${data.message}: ${data.errors[0]}`;
+      }
+    }
     return Promise.reject(message);
   }
 );
@@ -96,4 +105,9 @@ export const usersApi = {
   createUser: (userData) => api.post('/Users', userData),
   updateUser: (id, userData) => api.put(`/Users/${id}`, userData),
   deleteUser: (id) => api.delete(`/Users/${id}`),
+};
+
+export const verifyApi = {
+  verifyTicket: (qrCode, staffId) => api.post('/Verify/ticket', { qrCode, staffId: staffId.toString() }),
+  getRecentLogs: (staffId) => api.get(`/Verify/logs?staffId=${staffId}`),
 };

@@ -2,9 +2,12 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Ticket, CreditCard, CheckCircle2, ChevronRight, X, Phone, Smartphone, ShieldCheck } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../components/Common/AuthContext';
+import { bookingsApi } from '../../services/api';
 
 const BookingFlow = () => {
-  const { id } = useParams();
+  const { id: eventId } = useParams();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [step, setStep] = useState(1);
@@ -43,7 +46,7 @@ const BookingFlow = () => {
     setShowMomo(true);
   };
 
-  const confirmPayment = () => {
+  const confirmPayment = async () => {
     // MTN Rwanda validation: 10 digits starting with 078 or 079
     const mtnRegex = /^(078|079)\d{7}$/;
     if (!mtnRegex.test(phoneNumber)) {
@@ -53,27 +56,28 @@ const BookingFlow = () => {
     setPhoneError('');
     setMomoStatus('pending');
     
-    setTimeout(() => {
-      // Save to localStorage
-      const newBooking = {
-        id: `REH-${new Date().getTime().toString().slice(-6)}`,
-        event: "Rwanda Tech Summit 2026",
-        date: "May 15-17, 2026",
-        location: "Convention Centre",
-        seats: selectedSeats.map(s => `${s.type} #${s.id}`),
-        status: "confirmed",
-        price: `${totalPrice.toLocaleString()} RWF`,
-        qr: `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=REH-${new Date().getTime()}-VAL-OK`
-      };
-      
-      const existing = JSON.parse(localStorage.getItem('myBookings') || '[]');
-      localStorage.setItem('myBookings', JSON.stringify([newBooking, ...existing]));
+    try {
+      // Create bookings in the database for each selected seat
+      for (const seat of selectedSeats) {
+         await bookingsApi.createBooking({
+            eventId: parseInt(eventId),
+            userId: user.id,
+            seatId: seat.id, // Assuming Mock Seat ID matches DB Seat ID for this event
+            bookingStatus: "Confirmed",
+            paymentStatus: "Success",
+            totalPrice: seat.price
+         });
+      }
       
       setMomoStatus('success');
       setTimeout(() => {
         navigate('/dashboard/bookings');
       }, 1500);
-    }, 2000);
+    } catch (err) {
+      console.error("Booking failed:", err);
+      setPhoneError("System Error: Failed to secure seats. Please try again.");
+      setMomoStatus('prompt');
+    }
   };
 
   if (momoStatus === 'success') {

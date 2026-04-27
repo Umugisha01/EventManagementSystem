@@ -12,7 +12,15 @@ const StaffManagement = () => {
   const [loading, setLoading] = useState(true);
   
   const [showAddModal, setShowAddModal] = useState(false);
+  const [modalMode, setModalMode] = useState('assign'); // 'assign' or 'recruit'
   const [newDeployment, setNewDeployment] = useState({ staffId: '', eventId: '' });
+  const [recruitData, setRecruitData] = useState({
+    fullName: '',
+    email: '',
+    username: '',
+    password: '',
+    phoneNumber: ''
+  });
   const [errorMsg, setErrorMsg] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [eventFilter, setEventFilter] = useState('All');
@@ -24,17 +32,14 @@ const StaffManagement = () => {
   const fetchInitialData = async () => {
     setLoading(true);
     try {
-      // 1. Fetch Manager's Events
       const allEvents = await eventsApi.getEvents();
       const myEvents = allEvents.filter(e => e.manager?.userName === user.username);
       setManagerEvents(myEvents);
 
-      // 2. Fetch All System Staff Users
       const allUsers = await usersApi.getUsers();
       const staffUsers = allUsers.filter(u => u.role === 'Staff');
       setAvailableStaff(staffUsers);
 
-      // 3. Fetch Deployments for each event
       const deploymentPromises = myEvents.map(e => staffApi.getEventStaff(e.id));
       const results = await Promise.all(deploymentPromises);
       const combined = results.flatMap(res => res || []);
@@ -71,6 +76,36 @@ const StaffManagement = () => {
     }
   };
 
+  const handleRecruit = async (e) => {
+    e.preventDefault();
+    if (!newDeployment.eventId) return;
+    
+    try {
+      setLoading(true);
+      // 1. Create User
+      const newUser = await usersApi.createUser({
+        ...recruitData,
+        role: 'Staff'
+      });
+
+      // 2. Assign to Event
+      await staffApi.assignStaff({
+        staffId: newUser.id,
+        eventId: parseInt(newDeployment.eventId),
+        isActive: true
+      });
+
+      alert(`Operative ${recruitData.fullName} recruited and deployed!`);
+      setShowAddModal(false);
+      setRecruitData({ fullName: '', email: '', username: '', password: '', phoneNumber: '' });
+      fetchInitialData();
+    } catch (err) {
+      setErrorMsg(err.toString());
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleDecommission = async (id) => {
     if (!window.confirm('Are you sure you want to terminate this deployment?')) return;
     try {
@@ -95,13 +130,22 @@ const StaffManagement = () => {
            <h1 className="text-4xl font-black italic tracking-tighter uppercase mb-2">Staff Deployment</h1>
            <p className="text-[var(--text-secondary)] font-medium">Strategic mobilization of scanning units for your authorized sectors.</p>
         </div>
-        <button 
-          onClick={() => setShowAddModal(true)}
-          className="btn-primary flex items-center space-x-3 px-8 py-4 shadow-xl shadow-event-gold/20"
-        >
-          <UserPlus className="w-5 h-5 text-black" />
-          <span className="font-black uppercase tracking-widest text-xs text-black">Commission Staff</span>
-        </button>
+        <div className="flex space-x-3">
+          <button 
+            onClick={() => { setModalMode('recruit'); setShowAddModal(true); }}
+            className="flex-1 md:flex-none btn-secondary flex items-center space-x-3 px-8 py-4 border border-white/10"
+          >
+            <UserPlus className="w-5 h-5 text-white" />
+            <span className="font-black uppercase tracking-widest text-xs text-white">Recruit New</span>
+          </button>
+          <button 
+            onClick={() => { setModalMode('assign'); setShowAddModal(true); }}
+            className="flex-1 md:flex-none btn-primary flex items-center space-x-3 px-8 py-4 shadow-xl shadow-event-gold/20"
+          >
+            <ShieldCheck className="w-5 h-5 text-black" />
+            <span className="font-black uppercase tracking-widest text-xs text-black">Commission Staff</span>
+          </button>
+        </div>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6 bg-white/5 p-6 rounded-3xl border border-white/5 shadow-2xl">
@@ -141,7 +185,7 @@ const StaffManagement = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5">
-            {loading ? (
+            {loading && !showAddModal ? (
               <tr>
                  <td colSpan="4" className="p-20 text-center">
                     <Loader2 className="w-8 h-8 animate-spin mx-auto text-event-gold mb-4" />
@@ -196,21 +240,103 @@ const StaffManagement = () => {
 
       <AnimatePresence>
         {showAddModal && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-black/95 backdrop-blur-xl">
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-black/95 backdrop-blur-xl overflow-y-auto pt-20">
             <motion.div 
               initial={{ scale: 0.95, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 20 }}
-              className="bg-[#0A0A0A] border border-white/10 p-10 rounded-[3rem] w-full max-w-xl shadow-[0_0_80px_rgba(0,0,0,0.8)] relative overflow-hidden"
+              className="bg-[#0A0A0A] border border-white/10 p-10 rounded-[3rem] w-full max-w-2xl shadow-[0_0_80px_rgba(0,0,0,0.8)] relative overflow-hidden"
             >
               <div className="absolute top-0 right-0 p-8 opacity-5">
                  <ShieldCheck className="w-32 h-32" />
               </div>
 
-              <h2 className="text-3xl font-black italic tracking-tighter uppercase mb-2">Commission Operative</h2>
-              <p className="text-sm text-gray-500 mb-10 font-medium">strategic sector assignment for your authorized Rwandan events.</p>
+              <div className="flex items-center space-x-6 mb-8 border-b border-white/5 pb-2">
+                 <button 
+                   onClick={() => setModalMode('assign')}
+                   className={`pb-4 text-sm font-black uppercase tracking-widest transition-all ${modalMode === 'assign' ? 'text-event-gold border-b-2 border-event-gold' : 'text-gray-600'}`}
+                 >
+                   Deploy Existing
+                 </button>
+                 <button 
+                   onClick={() => setModalMode('recruit')}
+                   className={`pb-4 text-sm font-black uppercase tracking-widest transition-all ${modalMode === 'recruit' ? 'text-event-gold border-b-2 border-event-gold' : 'text-gray-600'}`}
+                 >
+                   Recruit New
+                 </button>
+              </div>
+
+              <h2 className="text-3xl font-black italic tracking-tighter uppercase mb-2">
+                {modalMode === 'assign' ? 'Commission Operative' : 'Recruit Operative'}
+              </h2>
+              <p className="text-sm text-gray-500 mb-8 font-medium">
+                {modalMode === 'assign' 
+                  ? 'strategic sector assignment for your authorized Rwandan events.'
+                  : 'Establish new tactical units for platform operations.'}
+              </p>
               
-              <form onSubmit={handleDeploy} className="space-y-8">
+              <form onSubmit={modalMode === 'assign' ? handleDeploy : handleRecruit} className="space-y-6">
+                
+                {modalMode === 'recruit' && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                     <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase text-gray-600 tracking-widest">Full Name</label>
+                        <input 
+                           type="text" 
+                           required
+                           className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:border-event-gold outline-none font-bold text-gray-300"
+                           value={recruitData.fullName}
+                           onChange={e => setRecruitData({...recruitData, fullName: e.target.value})}
+                           placeholder="e.g. Jean Damascene"
+                        />
+                     </div>
+                     <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase text-gray-600 tracking-widest">Email Address</label>
+                        <input 
+                           type="email" 
+                           required
+                           className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:border-event-gold outline-none font-bold text-gray-300"
+                           value={recruitData.email}
+                           onChange={e => setRecruitData({...recruitData, email: e.target.value})}
+                           placeholder="staff@eventhub.rw"
+                        />
+                     </div>
+                     <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase text-gray-600 tracking-widest">Tactical ID (Username)</label>
+                        <input 
+                           type="text" 
+                           required
+                           className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:border-event-gold outline-none font-bold text-gray-300"
+                           value={recruitData.username}
+                           onChange={e => setRecruitData({...recruitData, username: e.target.value})}
+                           placeholder="operative_01"
+                        />
+                     </div>
+                     <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase text-gray-600 tracking-widest">Access Key (Password)</label>
+                        <input 
+                           type="password" 
+                           required
+                           className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:border-event-gold outline-none font-bold text-gray-300"
+                           value={recruitData.password}
+                           onChange={e => setRecruitData({...recruitData, password: e.target.value})}
+                           placeholder="••••••••"
+                        />
+                     </div>
+                     <div className="md:col-span-2 space-y-2">
+                        <label className="text-[10px] font-black uppercase text-gray-600 tracking-widest">Phone Number</label>
+                        <input 
+                           type="tel" 
+                           required
+                           className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:border-event-gold outline-none font-bold text-gray-300"
+                           value={recruitData.phoneNumber}
+                           onChange={e => setRecruitData({...recruitData, phoneNumber: e.target.value})}
+                           placeholder="+250..."
+                        />
+                     </div>
+                  </div>
+                )}
+
                 <div>
                    <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-3">Target Sector (Your Assigned Events)</label>
                    <select 
@@ -225,25 +351,33 @@ const StaffManagement = () => {
                    </select>
                 </div>
 
-                <div>
-                   <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-3">Operative Personnel (Verified Staff Units)</label>
-                   <select 
-                     value={newDeployment.staffId}
-                     onChange={(e) => setNewDeployment({...newDeployment, staffId: e.target.value})}
-                     className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:border-event-gold outline-none appearance-none font-bold text-gray-300"
-                   >
-                     {availableStaff.map(s => (
-                       <option key={s.id} value={s.id} className="bg-black">{s.fullName} (@{s.userName})</option>
-                     ))}
-                     {availableStaff.length === 0 && <option value="">NO VERIFIED STAFF DETECTED</option>}
-                   </select>
-                </div>
+                {modalMode === 'assign' && (
+                  <div>
+                    <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-3">Operative Personnel (Verified Staff Units)</label>
+                    <select 
+                      value={newDeployment.staffId}
+                      onChange={(e) => setNewDeployment({...newDeployment, staffId: e.target.value})}
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:border-event-gold outline-none appearance-none font-bold text-gray-300"
+                    >
+                      {availableStaff.map(s => (
+                        <option key={s.id} value={s.id} className="bg-black">{s.fullName} (@{s.userName})</option>
+                      ))}
+                      {availableStaff.length === 0 && <option value="">NO VERIFIED STAFF DETECTED</option>}
+                    </select>
+                  </div>
+                )}
 
                 {errorMsg && <p className="text-red-500 text-[10px] font-black uppercase tracking-widest text-center">{errorMsg}</p>}
                 
                 <div className="flex space-x-4 pt-6">
                   <button type="button" onClick={() => setShowAddModal(false)} className="flex-1 py-5 glass-button font-black uppercase text-[10px] tracking-widest">Abort</button>
-                  <button type="submit" disabled={managerEvents.length === 0 || availableStaff.length === 0} className="flex-1 py-5 btn-primary text-black font-black uppercase text-[10px] tracking-widest disabled:opacity-30">Deploy Assignment</button>
+                  <button 
+                    type="submit" 
+                    disabled={loading || managerEvents.length === 0 || (modalMode === 'assign' && availableStaff.length === 0)} 
+                    className="flex-1 py-5 btn-primary text-black font-black uppercase text-[10px] tracking-widest disabled:opacity-30"
+                  >
+                    {loading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : (modalMode === 'assign' ? 'Deploy Assignment' : 'Confirm Recruitment')}
+                  </button>
                 </div>
               </form>
             </motion.div>

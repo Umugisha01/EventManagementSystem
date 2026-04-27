@@ -1,41 +1,47 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Ticket, Calendar, MapPin, QrCode, Download, Printer, CheckCircle2, MoreHorizontal } from 'lucide-react';
+import { Ticket, Calendar, MapPin, QrCode, Download, Printer, CheckCircle2, MoreHorizontal, Search, Loader2, ShieldCheck } from 'lucide-react';
 import jsPDF from 'jspdf';
+import { useAuth } from '../../components/Common/AuthContext';
+import { bookingsApi } from '../../services/api';
 
 const Bookings = () => {
+  const { user } = useAuth();
   const [showQR, setShowQR] = useState(null);
   const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
 
-  const MOCK_BOOKINGS = [
-    { 
-      id: "REH-2026-001", 
-      event: "Rwanda Tech Summit 2026", 
-      date: "May 15-17, 2026", 
-      location: "Convention Centre", 
-      seats: ["VVIP #01", "VVIP #02"], 
-      status: "confirmed",
-      price: "100,000 RWF",
-      qr: "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=REH-2026-001-VAL-OK"
-    },
-    { 
-      id: "REH-2026-042", 
-      event: "Creative Expo", 
-      date: "July 20-22, 2026", 
-      location: "Kigali Heights", 
-      seats: ["Regular #142"], 
-      status: "pending_payment",
-      price: "15,000 RWF",
-      qr: ""
-    }
-  ];
-
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem('myBookings') || '[]');
-    setBookings(saved);
-  }, []);
+    const loadBookings = async () => {
+      try {
+        const data = await bookingsApi.getUserHistory(user.id);
+        const mapped = data.map(b => ({
+          id: b.qrTicketCode || `REH-${b.id}`,
+          originalId: b.id,
+          event: b.event?.title || "Event Hub Premium",
+          date: b.event?.date ? new Date(b.event.date).toLocaleDateString() : "May 15-17, 2026",
+          location: b.event?.location || "Convention Centre",
+          seats: b.seat?.seatNumber ? [b.seat.seatNumber] : ["Assigned Seat"],
+          status: b.bookingStatus.toLowerCase(),
+          price: `${b.totalPrice.toLocaleString()} RWF`,
+          attendeeName: b.user?.fullName || user?.fullName || "Verified Guest",
+          attendeeEmail: b.user?.email || user?.email || "guest@eventhub.rw",
+          purchasedAt: new Date(b.bookingDate).toLocaleString(),
+          checkedInBy: b.checkedInByStaff?.fullName || null,
+          checkedInAt: b.checkedInAt ? new Date(b.checkedInAt).toLocaleString() : null,
+          qr: `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=REH-${b.eventId}-${b.id}`
+        }));
+        setBookings(mapped);
+      } catch (err) {
+        console.error("Failed to fetch bookings:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (user?.id) loadBookings();
+  }, [user?.id]);
 
   const filteredBookings = bookings.filter(b => {
     const matchSearch = b.event.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -46,75 +52,103 @@ const Bookings = () => {
   });
 
   const handleDownloadPDF = async (booking) => {
-    const doc = new jsPDF();
+    const doc = new jsPDF({
+      orientation: 'landscape',
+      unit: 'mm',
+      format: 'a4'
+    });
     
-    // Background
-    doc.setFillColor(10, 10, 10);
-    doc.rect(0, 0, 210, 297, 'F');
+    // Background (Dark)
+    doc.setFillColor(5, 5, 5);
+    doc.rect(0, 0, 297, 210, 'F');
     
-    // Gold Accent Sidebar
-    doc.setFillColor(212, 175, 55);
-    doc.rect(0, 0, 12, 297, 'F');
-
-    // Brand Header
+    // Gold Accent Borders
+    doc.setDrawColor(212, 175, 55);
+    doc.setLineWidth(1);
+    doc.rect(10, 10, 277, 190);
+    
+    // Brand Section (Top Left)
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(26);
+    doc.setFontSize(24);
     doc.setTextColor(212, 175, 55);
     doc.text("RWANDA EVENT HUB", 25, 35);
     
-    doc.setFontSize(9);
-    doc.setTextColor(100, 100, 100);
-    doc.text("OFFICIAL VENUE ADMISSION PASS • SECURE TICKET", 25, 45);
+    doc.setFontSize(8);
+    doc.setTextColor(150, 150, 150);
+    doc.text("OFFICIAL LANDSCAPE ADMISSION PASS • SECURE TICKET PRO", 25, 45);
 
-    doc.setDrawColor(40, 40, 40);
-    doc.line(25, 55, 190, 55);
+    // Main Content Split
+    doc.setDrawColor(30, 30, 30);
+    doc.line(160, 30, 160, 180); // Vertical Divider
 
-    // Event Info
-    doc.setFontSize(20);
+    // Event Info (Left Side)
+    doc.setFontSize(28);
     doc.setTextColor(255, 255, 255);
     doc.text(booking.event.toUpperCase(), 25, 75);
 
-    const info = [
+    const leftInfo = [
       { l: "BOOKING ID", v: booking.id },
       { l: "DATE & TIME", v: booking.date },
       { l: "VENUE", v: booking.location },
       { l: "SEAT(S)", v: booking.seats.join(', ') },
-      { l: "PRICE", v: booking.price }
+      { l: "TOTAL PRICE", v: booking.price }
     ];
 
-    let y = 95;
-    info.forEach(item => {
-      doc.setFontSize(8);
-      doc.setTextColor(150, 150, 150);
-      doc.text(item.l, 25, y);
-      doc.setFontSize(11);
+    let ly = 95;
+    leftInfo.forEach(item => {
+      doc.setFontSize(7);
+      doc.setTextColor(212, 175, 55);
+      doc.text(item.l, 25, ly);
+      doc.setFontSize(12);
       doc.setTextColor(255, 255, 255);
-      doc.text(String(item.v), 25, y+6);
-      y += 20;
+      doc.text(String(item.v), 25, ly+6);
+      ly += 16;
     });
 
-    // QR Code Integration
+    // Attendee Detail (Right Side)
+    doc.setFontSize(14);
+    doc.setTextColor(212, 175, 55);
+    doc.text("ATTENDEE CREDENTIALS", 175, 45);
+    
+    const rightInfo = [
+      { l: "FULL NAME", v: booking.attendeeName },
+      { l: "ID / EMAIL", v: booking.attendeeEmail },
+      { l: "PURCHASED AT", v: booking.purchasedAt },
+      { l: "STATUS", v: booking.status === "checkedin" ? "ADMITTED" : "AUTHORIZED" },
+      ...(booking.checkedInBy ? [{ l: "CLEARED BY", v: booking.checkedInBy }] : [])
+    ];
+
+    let ry = 60;
+    rightInfo.forEach(item => {
+      doc.setFontSize(7);
+      doc.setTextColor(100, 100, 100);
+      doc.text(item.l, 175, ry);
+      doc.setFontSize(10);
+      doc.setTextColor(255, 255, 255);
+      doc.text(String(item.v), 175, ry+6);
+      ry += 15;
+    });
+
+    // QR Code Section
     if (booking.qr) {
-       doc.setDrawColor(212, 175, 55);
-       doc.rect(130, 90, 60, 60);
+       doc.setFillColor(255, 255, 255);
+       doc.rect(190, 140, 50, 50, 'F');
        try {
-         // Embed QR 
-         doc.addImage(booking.qr, 'PNG', 135, 95, 50, 50);
+         doc.addImage(booking.qr, 'PNG', 190, 140, 50, 50);
        } catch (e) {
          console.error("QR Error:", e);
        }
-       doc.setFontSize(8);
+       doc.setFontSize(7);
        doc.setTextColor(212, 175, 55);
-       doc.text("SCAN AT VENUE GATE", 143, 155);
+       doc.text("SCANNABLE GATE KEY", 195, 195);
     }
 
     // Security Footer
-    doc.setFontSize(7);
-    doc.setTextColor(60, 60, 60);
-    doc.text("This document is a valid legal ticket for the mentioned event. Please keep it confidential.", 25, 275);
-    doc.text("Generated by Rwanda EventHub Tactical Platform. Security Code: " + booking.id + "-REH", 25, 280);
+    doc.setFontSize(6);
+    doc.setTextColor(50, 50, 50);
+    doc.text("SECURITY PROTOCOL: v2.4.1 | Landscape Pass Encryption Standard", 25, 195);
 
-    doc.save(`Ticket_${booking.id}.pdf`);
+    doc.save(`Ticket_PRO_${booking.id}.pdf`);
   };
 
   return (
@@ -146,7 +180,12 @@ const Bookings = () => {
       </div>
 
       <div className="grid gap-6">
-        {filteredBookings.length === 0 ? (
+        {loading ? (
+          <div className="py-20 flex flex-col items-center justify-center space-y-4">
+            <Loader2 className="w-12 h-12 text-event-gold animate-spin" />
+            <p className="text-sm font-black uppercase tracking-widest text-gray-500">Retrieving Secure Passports...</p>
+          </div>
+        ) : filteredBookings.length === 0 ? (
           <div className="glass-card p-16 flex flex-col items-center justify-center text-center">
             <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-6 border-2 border-dashed border-white/10">
               <Ticket className="w-8 h-8 text-[var(--text-secondary)]" />
@@ -192,6 +231,22 @@ const Bookings = () => {
                       <span>{booking.seats.join(', ')}</span>
                     </div>
                  </div>
+                 
+                 {booking.purchasedAt && (
+                   <div className="pt-4 border-t border-white/5 flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest">Transaction Security:</span>
+                        <span className="text-[10px] font-bold text-event-gold">{booking.purchasedAt}</span>
+                      </div>
+                      
+                      {booking.checkedInBy && (
+                        <div className="flex items-center space-x-2 bg-green-500/10 px-3 py-1 rounded-lg border border-green-500/20">
+                           <ShieldCheck className="w-3 h-3 text-green-500" />
+                           <span className="text-[10px] font-black text-green-500 uppercase">Cleared by: {booking.checkedInBy}</span>
+                        </div>
+                      )}
+                   </div>
+                 )}
               </div>
 
               {/* Right Actions */}

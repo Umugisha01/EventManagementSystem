@@ -21,7 +21,8 @@ import {
   FileSpreadsheet,
   FileText,
   MapPin,
-  ArrowRight
+  ArrowRight,
+  User
 } from 'lucide-react';
 const StatCard = ({ title, value, icon: Icon, trend }) => (
   <div className="glass-card p-6">
