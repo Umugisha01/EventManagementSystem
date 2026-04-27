@@ -12,12 +12,17 @@ const api = axios.create({
 // Add a request interceptor to include the JWT token
 api.interceptors.request.use(
   (config) => {
-    const savedUser = localStorage.getItem('hub_user');
-    if (savedUser) {
-      const { token } = JSON.parse(savedUser);
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+    try {
+      const savedUser = localStorage.getItem('hub_user');
+      if (savedUser) {
+        const { token } = JSON.parse(savedUser);
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
       }
+    } catch (e) {
+      console.error("Auth Token Corrupted:", e);
+      localStorage.removeItem('hub_user');
     }
     return config;
   },
@@ -38,6 +43,14 @@ api.interceptors.response.use(
     return response.data;
   },
   (error) => {
+    // Force logout on 401 Unauthorized
+    if (error.response?.status === 401) {
+      localStorage.removeItem('hub_user');
+      if (!window.location.pathname.includes('/login')) {
+         window.location.href = '/login?expired=true';
+      }
+    }
+
     let message = 'Network Error';
     if (error.response?.data) {
       const data = error.response.data;
