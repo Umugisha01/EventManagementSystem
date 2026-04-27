@@ -114,8 +114,8 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('hub_user');
     if (message) {
       localStorage.setItem('auth_message', message);
-      window.location.href = '/login';
     }
+    window.location.href = '/login';
   };
 
   return (
