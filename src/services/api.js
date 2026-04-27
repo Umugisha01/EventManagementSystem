@@ -99,6 +99,7 @@ export const analyticsApi = {
 
 export const staffApi = {
   getEventStaff: (eventId) => api.get(`/Staff/event/${eventId}`),
+  getStaffAssignments: (staffId) => api.get(`/Staff/assignments/${staffId}`),
   assignStaff: (data) => api.post('/Staff/assign', data),
   removeStaff: (id) => api.delete(`/Staff/${id}`),
 };
