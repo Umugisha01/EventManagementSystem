@@ -4,6 +4,7 @@ const API_BASE_URL = 'https://rweh.runasp.net/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
+  timeout: 60000, 
   headers: {
     'Content-Type': 'application/json',
   },
