@@ -1,10 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Calendar, User, LayoutDashboard, Menu, X, LogOut, ScanLine, History, ChevronRight, Home, Users, ShieldCheck } from 'lucide-react';
+import { Calendar, User, LayoutDashboard, Menu, X, LogOut, ScanLine, History, ChevronRight, Home, Users, ShieldCheck, MapPin, CreditCard, MessageSquare } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import ThemeToggle from '../Common/ThemeToggle';
 import { useAuth } from '../Common/AuthContext';
+
+const menuItems = {
+  admin: [
+    { name: 'System Overview', icon: Home, path: '/dashboard' },
+    { name: 'Events', icon: Calendar, path: '/dashboard/events' },
+    { name: 'User Management', icon: ShieldCheck, path: '/dashboard/users' },
+    { name: 'Venue Manager', icon: MapPin, path: '/dashboard/venues' },
+    { name: 'Master Chat', icon: MessageSquare, path: '/dashboard/chat' },
+  ],
+  manager: [
+    { name: 'My Events', icon: Calendar, path: '/dashboard/my-events' },
+    { name: 'Event Attendees', icon: Users, path: '/dashboard/attendees' },
+    { name: 'Staff Management', icon: ShieldCheck, path: '/dashboard/staff' },
+  ],
+  staff: [
+    { name: 'QR Scanner', icon: ScanLine, path: '/dashboard/scanner' },
+    { name: 'Scanned Logs', icon: History, path: '/dashboard/scanned' },
+  ],
+  attendee: [
+    { name: 'My Tickets', icon: CreditCard, path: '/dashboard/bookings' },
+    { name: 'Ask Admin', icon: MessageSquare, path: '/dashboard/chat' },
+  ]
+};
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -146,46 +169,11 @@ const Navbar = () => {
                         className="overflow-hidden bg-white/5 rounded-2xl mt-1 border border-white/5"
                        >
                          <div className="p-2 space-y-1">
-                            {user.role === 'admin' && (
-                              <>
-                                 <Link to="/dashboard" onClick={() => setIsOpen(false)} className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/10 font-bold text-sm">
-                                   <Home size={16} className="text-event-gold" /> System Overview
-                                 </Link>
-                                 <Link to="/dashboard/events" onClick={() => setIsOpen(false)} className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/10 font-bold text-sm">
-                                   <Calendar size={16} className="text-event-gold" /> Events Management
-                                 </Link>
-                                 <Link to="/dashboard/users" onClick={() => setIsOpen(false)} className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/10 font-bold text-sm">
-                                   <ShieldCheck size={16} className="text-event-gold" /> User Registry
-                                 </Link>
-                              </>
-                            )}
-                            {user.role === 'staff' && (
-                              <>
-                                 <Link to="/dashboard/scanner" onClick={() => setIsOpen(false)} className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/10 font-bold text-sm italic">
-                                   <ScanLine size={16} className="text-event-gold" /> Tactical QR Scanner
-                                 </Link>
-                                 <Link to="/dashboard/scanned" onClick={() => setIsOpen(false)} className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/10 font-bold text-sm">
-                                   <History size={16} className="text-event-gold" /> Scanned Logs
-                                 </Link>
-                              </>
-                            )}
-                            {user.role === 'manager' && (
-                              <>
-                                 <Link to="/dashboard/my-events" onClick={() => setIsOpen(false)} className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/10 font-bold text-sm">
-                                   <Calendar size={16} className="text-event-gold" /> My Tactical Events
-                                 </Link>
-                                 <Link to="/dashboard/staff" onClick={() => setIsOpen(false)} className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/10 font-bold text-sm">
-                                   <Users size={16} className="text-event-gold" /> Staff Management
-                                 </Link>
-                              </>
-                            )}
-                            {user.role === 'attendee' && (
-                              <>
-                                 <Link to="/dashboard/bookings" onClick={() => setIsOpen(false)} className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/10 font-bold text-sm">
-                                   <LayoutDashboard size={16} className="text-event-gold" /> My Tickets
-                                 </Link>
-                              </>
-                            )}
+                            {(menuItems[user.role?.toLowerCase()] || menuItems['attendee']).map((item) => (
+                               <Link key={item.path} to={item.path} onClick={() => setIsOpen(false)} className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/10 font-bold text-sm">
+                                 <item.icon size={16} className="text-event-gold" /> <span>{item.name}</span>
+                               </Link>
+                            ))}
                          </div>
                        </motion.div>
                      )}
