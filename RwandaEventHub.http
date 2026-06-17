@@ -1,0 +1,6 @@
+@RwandaEventHub_HostAddress = http://localhost:5202
+
+GET {{RwandaEventHub_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
